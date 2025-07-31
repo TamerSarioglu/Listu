@@ -75,6 +75,8 @@ dependencies {
 
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+
 
     // Material Icons Extended
     implementation(libs.material.icons.extended)
@@ -92,5 +94,8 @@ dependencies {
     //Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    //hilt compose
+    implementation(libs.androidx.hilt.navigation.compose)
 
 }
