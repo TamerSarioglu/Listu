@@ -17,4 +17,10 @@ abstract class RepositoryModule {
     abstract fun bindGetTopAnimeRepository(
         getTopAnimeRepositoryImpl: GetTopAnimeRepositoryImpl
     ): GetTopAnimeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGetAnimeDetailRepository(
+        getAnimeDetailRepositoryImpl: com.tamersarioglu.listu.data.repository.GetAnimeDetailRepositoryImpl
+    ): com.tamersarioglu.listu.domain.repository.GetAnimeDetailRepository
 }

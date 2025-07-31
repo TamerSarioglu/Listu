@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.tamersarioglu.listu.presentation.screen.TopAnimeScreen
+import com.tamersarioglu.listu.presentation.navigation.NavGraph
 import com.tamersarioglu.listu.presentation.ui.theme.ListuTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ListuTheme {
-                TopAnimeScreen()
+                NavGraph()
             }
         }
     }

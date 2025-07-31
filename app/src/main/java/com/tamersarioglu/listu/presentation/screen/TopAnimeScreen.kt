@@ -16,6 +16,7 @@ import com.tamersarioglu.listu.presentation.viewmodel.TopAnimeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAnimeScreen(
+    onAnimeClick: (Int) -> Unit = {},
     viewModel: TopAnimeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -64,7 +65,10 @@ fun TopAnimeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(uiState.animeList) { anime ->
-                            AnimeCard(anime = anime)
+                            AnimeCard(
+                                anime = anime,
+                                onAnimeClick = onAnimeClick
+                            )
                         }
                     }
                 }

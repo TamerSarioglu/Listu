@@ -52,4 +52,9 @@ object NetworkModule {
     fun provideTopAnimeService(retrofit: Retrofit): TopAnimeService =
         retrofit.create(TopAnimeService::class.java)
 
+    @Provides
+    @Singleton
+    fun provideAnimeDetailService(retrofit: Retrofit): com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService =
+        retrofit.create(com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService::class.java)
+
 }

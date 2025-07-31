@@ -1,0 +1,400 @@
+package com.tamersarioglu.listu.presentation.screen
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil3.compose.AsyncImage
+import com.tamersarioglu.listu.domain.model.animedetailmodel.AnimeDetail
+import com.tamersarioglu.listu.presentation.viewmodel.AnimeDetailViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnimeDetailScreen(
+    malId: Int,
+    onBackClick: () -> Unit,
+    viewModel: AnimeDetailViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(malId) {
+        viewModel.loadAnimeDetail(malId)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        text = uiState.animeDetail?.title ?: "Anime Details",
+                        maxLines = 1
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                
+                uiState.error != null -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = uiState.error ?: "Unknown error",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Button(
+                            onClick = { viewModel.retry(malId) }
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                
+                uiState.animeDetail != null -> {
+                    AnimeDetailContent(
+                        animeDetail = uiState.animeDetail!!,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimeDetailContent(
+    animeDetail: AnimeDetail,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Hero Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AsyncImage(
+                        model = animeDetail.images.jpg.largeImageUrl ?: animeDetail.images.jpg.imageUrl,
+                        contentDescription = animeDetail.title,
+                        modifier = Modifier
+                            .size(160.dp, 240.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = animeDetail.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        animeDetail.titleEnglish?.let { englishTitle ->
+                            Text(
+                                text = englishTitle,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(animeDetail.type) }
+                            )
+                            
+                            animeDetail.episodes?.let { episodes ->
+                                AssistChip(
+                                    onClick = { },
+                                    label = { Text("$episodes eps") }
+                                )
+                            }
+                        }
+                        
+                        AssistChip(
+                            onClick = { },
+                            label = { Text(animeDetail.status) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = when (animeDetail.status.lowercase()) {
+                                    "currently airing" -> MaterialTheme.colorScheme.primaryContainer
+                                    "finished airing" -> MaterialTheme.colorScheme.secondaryContainer
+                                    else -> MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Statistics Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Statistics",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    animeDetail.score?.let { score ->
+                        StatCard(
+                            icon = Icons.Default.Star,
+                            value = score.toString(),
+                            label = "Score",
+                            iconTint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    animeDetail.rank?.let { rank ->
+                        StatCard(
+                            icon = Icons.Default.Star,
+                            value = "#$rank",
+                            label = "Rank",
+                            iconTint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                    
+                    animeDetail.members?.let { members ->
+                        StatCard(
+                            icon = Icons.Default.People,
+                            value = formatNumber(members),
+                            label = "Members",
+                            iconTint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    
+                    animeDetail.favorites?.let { favorites ->
+                        StatCard(
+                            icon = Icons.Default.Favorite,
+                            value = formatNumber(favorites),
+                            label = "Favorites",
+                            iconTint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Genres Section
+        if (animeDetail.genres.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Genres",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(animeDetail.genres) { genre ->
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(genre.name) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Synopsis Section
+        animeDetail.synopsis?.let { synopsis ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Synopsis",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    
+                    Text(
+                        text = synopsis,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+        
+        // Information Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Information",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                
+                InfoRow("Type", animeDetail.type)
+                animeDetail.episodes?.let { InfoRow("Episodes", it.toString()) }
+                InfoRow("Status", animeDetail.status)
+                animeDetail.aired?.string?.let { InfoRow("Aired", it) }
+                animeDetail.duration?.let { InfoRow("Duration", it) }
+                animeDetail.rating?.let { InfoRow("Rating", it) }
+                animeDetail.source?.let { InfoRow("Source", it) }
+                animeDetail.popularity?.let { InfoRow("Popularity", "#$it") }
+                
+                if (animeDetail.studios.isNotEmpty()) {
+                    InfoRow("Studio", animeDetail.studios.first().name)
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Button(
+                    onClick = { /* TODO: Open MAL link */ },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("View on MyAnimeList")
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun StatCard(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    iconTint: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+private fun formatNumber(number: Int): String {
+    return when {
+        number >= 1_000_000 -> "${number / 1_000_000}M"
+        number >= 1_000 -> "${number / 1_000}K"
+        else -> number.toString()
+    }
+}

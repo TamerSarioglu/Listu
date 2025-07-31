@@ -19,16 +19,18 @@ import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnimeCard(
+    modifier: Modifier = Modifier,
     anime: Anime,
-    modifier: Modifier = Modifier
+    onAnimeClick: (Int) -> Unit = {},
 ) {
     Card(
+        onClick = { onAnimeClick(anime.malId) },
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -36,7 +38,7 @@ fun AnimeCard(
             AsyncImage(
                 model = anime.images.jpg.imageUrl,
                 contentDescription = anime.title,
-                modifier = Modifier
+                modifier = modifier
                     .size(80.dp, 120.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
@@ -44,7 +46,7 @@ fun AnimeCard(
             
             // Anime Info
             Column(
-                modifier = Modifier
+                modifier = modifier
                     .weight(1f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -95,7 +97,7 @@ fun AnimeCard(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rating",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = modifier.size(16.dp)
                         )
                         Text(
                             text = score.toString(),
