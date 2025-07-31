@@ -1,6 +1,7 @@
 package com.tamersarioglu.listu.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService
 import com.tamersarioglu.listu.data.remote.api.topanimeservice.TopAnimeService
 import dagger.Module
 import dagger.Provides
@@ -54,7 +55,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAnimeDetailService(retrofit: Retrofit): com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService =
-        retrofit.create(com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService::class.java)
+    fun provideAnimeDetailService(retrofit: Retrofit): AnimeDetailService =
+        retrofit.create(AnimeDetailService::class.java)
 
 }

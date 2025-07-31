@@ -1,6 +1,8 @@
 package com.tamersarioglu.listu.di
 
+import com.tamersarioglu.listu.data.repository.GetAnimeDetailRepositoryImpl
 import com.tamersarioglu.listu.data.repository.GetTopAnimeRepositoryImpl
+import com.tamersarioglu.listu.domain.repository.GetAnimeDetailRepository
 import com.tamersarioglu.listu.domain.repository.GetTopAnimeRepository
 import dagger.Binds
 import dagger.Module
@@ -21,6 +23,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGetAnimeDetailRepository(
-        getAnimeDetailRepositoryImpl: com.tamersarioglu.listu.data.repository.GetAnimeDetailRepositoryImpl
-    ): com.tamersarioglu.listu.domain.repository.GetAnimeDetailRepository
+        getAnimeDetailRepositoryImpl: GetAnimeDetailRepositoryImpl
+    ): GetAnimeDetailRepository
 }
