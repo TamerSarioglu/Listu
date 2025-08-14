@@ -1,12 +1,33 @@
 package com.tamersarioglu.listu.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -14,26 +35,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.tamersarioglu.listu.core.network.ConnectivityObserver
 import com.tamersarioglu.listu.presentation.components.AnimeCard
+import com.tamersarioglu.listu.presentation.components.ConnectionStatusBanner
+import com.tamersarioglu.listu.presentation.components.SkeletonGrid
 import com.tamersarioglu.listu.presentation.viewmodel.TopAnimeViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAnimeScreen(
     onAnimeClick: (Int) -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    viewModel: TopAnimeViewModel = hiltViewModel()
+    viewModel: TopAnimeViewModel = hiltViewModel(),
+    connectivityObserver: ConnectivityObserver
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val connectionStatus by connectivityObserver.observe()
+        .collectAsState(initial = ConnectivityObserver.Status.Available)
+    val isConnected = connectionStatus == ConnectivityObserver.Status.Available
 
     Scaffold(
         topBar = {
@@ -45,54 +67,57 @@ fun TopAnimeScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                 },
-                actions = {
-                    IconButton(onClick = onSearchClick) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.primary
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) { paddingValues ->
-        val pullToRefreshState = rememberPullToRefreshState()
-
-        PullToRefreshBox(
-            isRefreshing = uiState.isLoading,
-            onRefresh = { viewModel.loadTopAnime() },
-            state = pullToRefreshState,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            val gradientBackground = Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
-                )
+            ConnectionStatusBanner(
+                isConnected = isConnected,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(gradientBackground)
+            val pullToRefreshState = rememberPullToRefreshState()
+
+            PullToRefreshBox(
+                isRefreshing = uiState.isLoading && uiState.animeList.isNotEmpty(),
+                onRefresh = { viewModel.loadTopAnime() },
+                state = pullToRefreshState,
+                modifier = Modifier.weight(1f)
             ) {
+                val gradientBackground = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+                    )
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(1f)
+                        .background(gradientBackground)
                 ) {
                     val listState = rememberLazyListState()
 
                     when {
-                        uiState.isLoading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center),
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                        uiState.isLoading && uiState.animeList.isEmpty() -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(6) {
+                                    SkeletonGrid(itemCount = 1)
+                                }
+                            }
                         }
 
                         uiState.error != null -> {

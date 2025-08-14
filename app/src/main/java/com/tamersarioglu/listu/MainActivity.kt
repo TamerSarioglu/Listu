@@ -20,16 +20,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.tamersarioglu.listu.core.network.ConnectivityObserver
+import com.tamersarioglu.listu.core.performance.PerformanceMonitor
 import com.tamersarioglu.listu.presentation.navigation.FavoritesRoute
 import com.tamersarioglu.listu.presentation.navigation.NavGraph
 import com.tamersarioglu.listu.presentation.navigation.SearchRoute
 import com.tamersarioglu.listu.presentation.navigation.SettingsRoute
 import com.tamersarioglu.listu.presentation.navigation.TopAnimeRoute
 import com.tamersarioglu.listu.presentation.ui.theme.ListuTheme
+import com.tamersarioglu.listu.presentation.ui.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
+
+    @Inject
+    lateinit var themeManager: ThemeManager
+
+    @Inject
+    lateinit var performanceMonitor: PerformanceMonitor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -68,7 +82,12 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { padding ->
                     Box(modifier = Modifier.padding(padding)) {
-                        NavGraph(navController = navController)
+                        NavGraph(
+                            navController = navController,
+                            connectivityObserver = connectivityObserver,
+                            themeManager = themeManager,
+                            performanceMonitor = performanceMonitor
+                        )
                     }
                 }
             }

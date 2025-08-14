@@ -2,8 +2,8 @@ package com.tamersarioglu.listu.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tamersarioglu.listu.domain.model.SearchFilters
 import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
-import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 import com.tamersarioglu.listu.domain.usecase.IsFavoriteUseCase
 import com.tamersarioglu.listu.domain.usecase.SearchAnimeUseCase
 import com.tamersarioglu.listu.domain.usecase.ToggleFavoriteUseCase
@@ -24,51 +24,92 @@ class SearchAnimeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SearchAnimeUiState())
     val uiState: StateFlow<SearchAnimeUiState> = _uiState.asStateFlow()
 
+    private var currentFilters = SearchFilters()
+
     fun updateQuery(query: String) {
+        currentFilters = currentFilters.copy(query = query)
         _uiState.value = _uiState.value.copy(query = query)
+
+        if (query.length >= 3) {
+            search(page = 1, append = false)
+        } else if (query.isEmpty()) {
+            _uiState.value = _uiState.value.copy(
+                results = emptyList(),
+                currentPage = 1,
+                hasNextPage = false,
+                error = null
+            )
+        }
     }
 
-    fun search(page: Int = 1, append: Boolean = false) {
-        val currentQuery = _uiState.value.query
+    fun search(page: Int, append: Boolean) {
         viewModelScope.launch {
-            if (append) {
-                if (_uiState.value.isAppending || !_uiState.value.hasNextPage) return@launch
-                _uiState.value = _uiState.value.copy(isAppending = true, error = null)
-            } else {
-                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            }
-
-            searchAnimeUseCase(
-                query = currentQuery,
-                page = page,
-                limit = 25,
-                sfw = true
-            ).fold(
-                onSuccess = { result: TopAnimePage ->
-                    if (append) {
-                        _uiState.value = _uiState.value.copy(
-                            results = _uiState.value.results + result.items,
-                            isAppending = false,
-                            currentPage = result.currentPage,
-                            hasNextPage = result.hasNextPage
-                        )
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            results = result.items,
-                            isLoading = false,
-                            currentPage = result.currentPage,
-                            hasNextPage = result.hasNextPage
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    if (append) {
-                        _uiState.value = _uiState.value.copy(isAppending = false, error = e.message)
-                    } else {
-                        _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
-                    }
+            try {
+                if (!append) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = true,
+                        error = null,
+                        results = if (append) _uiState.value.results else emptyList()
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(isAppending = true)
                 }
-            )
+
+                searchAnimeUseCase(
+                    query = currentFilters.query,
+                    type = currentFilters.type?.apiValue,
+                    status = currentFilters.status?.apiValue,
+                    rating = currentFilters.rating?.apiValue,
+                    genres = currentFilters.genre?.malId?.toString(),
+                    producers = currentFilters.studio?.malId?.toString(),
+                    startDate = currentFilters.year?.let { "${it}-01-01" },
+                    minScore = currentFilters.minScore,
+                    maxScore = currentFilters.maxScore,
+                    orderBy = currentFilters.sortBy.apiValue,
+                    sort = currentFilters.sortOrder.apiValue,
+                    page = page,
+                    limit = 25,
+                    sfw = true
+                ).fold(
+                    onSuccess = { result ->
+                        val newResults = if (append) {
+                            _uiState.value.results + result.items
+                        } else {
+                            result.items
+                        }
+                        _uiState.value = _uiState.value.copy(
+                            results = newResults,
+                            currentPage = result.currentPage,
+                            hasNextPage = result.hasNextPage,
+                            isLoading = false,
+                            isAppending = false,
+                            error = null
+                        )
+                    },
+                    onFailure = { exception ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            isAppending = false,
+                            error = exception.message
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isAppending = false,
+                    error = "Search failed: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun searchWithFilters(filters: SearchFilters) {
+        currentFilters = filters
+        _uiState.value = _uiState.value.copy(query = filters.query)
+
+        if (filters.query.isNotEmpty()) {
+            search(page = 1, append = false)
         }
     }
 
@@ -92,9 +133,9 @@ class SearchAnimeViewModel @Inject constructor(
 data class SearchAnimeUiState(
     val query: String = "",
     val results: List<Anime> = emptyList(),
-    val isLoading: Boolean = false,
-    val isAppending: Boolean = false,
     val currentPage: Int = 1,
     val hasNextPage: Boolean = false,
+    val isLoading: Boolean = false,
+    val isAppending: Boolean = false,
     val error: String? = null
 )

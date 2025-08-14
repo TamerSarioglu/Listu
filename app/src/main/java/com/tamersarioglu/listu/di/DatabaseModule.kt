@@ -2,6 +2,9 @@ package com.tamersarioglu.listu.di
 
 import android.content.Context
 import androidx.room.Room
+import com.tamersarioglu.listu.core.network.ConnectivityObserver
+import com.tamersarioglu.listu.core.network.NetworkConnectivityObserver
+import com.tamersarioglu.listu.data.local.dao.AnimeDao
 import com.tamersarioglu.listu.data.local.dao.FavoriteAnimeDao
 import com.tamersarioglu.listu.data.local.database.ListuDatabase
 import com.tamersarioglu.listu.data.repository.FavoritesRepositoryImpl
@@ -23,6 +26,11 @@ abstract class DatabaseModule {
         favoritesRepositoryImpl: FavoritesRepositoryImpl
     ): FavoritesRepository
 
+    @Binds
+    abstract fun bindConnectivityObserver(
+        networkConnectivityObserver: NetworkConnectivityObserver
+    ): ConnectivityObserver
+
     companion object {
         @Provides
         @Singleton
@@ -31,12 +39,19 @@ abstract class DatabaseModule {
                 context,
                 ListuDatabase::class.java,
                 ListuDatabase.DATABASE_NAME
-            ).build()
+            )
+                .fallbackToDestructiveMigration(false) // For now, since we're in development
+                .build()
         }
 
         @Provides
         fun provideFavoriteAnimeDao(database: ListuDatabase): FavoriteAnimeDao {
             return database.favoriteAnimeDao()
+        }
+
+        @Provides
+        fun provideAnimeDao(database: ListuDatabase): AnimeDao {
+            return database.animeDao()
         }
     }
 }

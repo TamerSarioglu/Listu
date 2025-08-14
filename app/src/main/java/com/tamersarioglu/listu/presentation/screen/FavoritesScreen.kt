@@ -58,7 +58,8 @@ fun FavoritesScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary
                 )
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         Box(
             modifier = Modifier

@@ -6,15 +6,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.tamersarioglu.listu.core.network.ConnectivityObserver
 import com.tamersarioglu.listu.presentation.screen.AnimeDetailScreen
 import com.tamersarioglu.listu.presentation.screen.FavoritesScreen
 import com.tamersarioglu.listu.presentation.screen.SearchScreen
 import com.tamersarioglu.listu.presentation.screen.SettingsScreen
 import com.tamersarioglu.listu.presentation.screen.TopAnimeScreen
+import com.tamersarioglu.listu.core.performance.PerformanceMonitor
+import com.tamersarioglu.listu.presentation.ui.theme.ThemeManager
 
 @Composable
 fun NavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    connectivityObserver: ConnectivityObserver,
+    themeManager: ThemeManager,
+    performanceMonitor: PerformanceMonitor
 ) {
     NavHost(
         navController = navController,
@@ -25,7 +31,7 @@ fun NavGraph(
                 onAnimeClick = { malId ->
                     navController.navigate(AnimeDetailRoute(malId = malId))
                 },
-                onSearchClick = { navController.navigate(SearchRoute) }
+                connectivityObserver = connectivityObserver
             )
         }
         
@@ -53,7 +59,10 @@ fun NavGraph(
         }
 
         composable<SettingsRoute> {
-            SettingsScreen()
+            SettingsScreen(
+                themeManager = themeManager,
+                performanceMonitor = performanceMonitor
+            )
         }
     }
 }
