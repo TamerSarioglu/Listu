@@ -2,7 +2,7 @@ package com.tamersarioglu.listu.data.repository
 
 import com.tamersarioglu.listu.data.remote.api.topanimeservice.TopAnimeService
 import com.tamersarioglu.listu.data.remote.mapper.topanimemapper.toDomain
-import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
+import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 import com.tamersarioglu.listu.domain.repository.GetTopAnimeRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,11 +19,16 @@ class GetTopAnimeRepositoryImpl @Inject constructor(
         sfw: Boolean,
         page: Int,
         limit: Int
-    ): Result<List<Anime>> {
+    ): Result<TopAnimePage> {
         return try {
             val response = topAnimeService.getTopAnime(type, filter, rating, sfw, page, limit)
             val animeList = response.data.map { it.toDomain() }
-            Result.success(animeList)
+            val pageInfo = TopAnimePage(
+                currentPage = response.pagination.currentPage,
+                hasNextPage = response.pagination.hasNextPage,
+                items = animeList
+            )
+            Result.success(pageInfo)
         } catch (e: Exception) {
             Result.failure(e)
         }

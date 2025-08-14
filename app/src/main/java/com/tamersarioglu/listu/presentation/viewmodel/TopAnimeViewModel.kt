@@ -3,6 +3,7 @@ package com.tamersarioglu.listu.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
+import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 import com.tamersarioglu.listu.domain.usecase.GetTopAnimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,10 +28,16 @@ class TopAnimeViewModel @Inject constructor(
         type: String? = null,
         filter: String? = null,
         rating: String? = null,
-        page: Int = 1
+        page: Int = 1,
+        append: Boolean = false
     ) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            if (append) {
+                if (_uiState.value.isAppending || !_uiState.value.hasNextPage) return@launch
+                _uiState.value = _uiState.value.copy(isAppending = true, error = null)
+            } else {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            }
             
             getTopAnimeUseCase(
                 type = type,
@@ -38,18 +45,37 @@ class TopAnimeViewModel @Inject constructor(
                 rating = rating,
                 page = page
             ).fold(
-                onSuccess = { animeList ->
-                    _uiState.value = _uiState.value.copy(
-                        animeList = animeList,
-                        isLoading = false,
-                        error = null
-                    )
+                onSuccess = { pageResult: TopAnimePage ->
+                    if (append) {
+                        _uiState.value = _uiState.value.copy(
+                            animeList = _uiState.value.animeList + pageResult.items,
+                            isAppending = false,
+                            error = null,
+                            currentPage = pageResult.currentPage,
+                            hasNextPage = pageResult.hasNextPage
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            animeList = pageResult.items,
+                            isLoading = false,
+                            error = null,
+                            currentPage = pageResult.currentPage,
+                            hasNextPage = pageResult.hasNextPage
+                        )
+                    }
                 },
                 onFailure = { exception ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = exception.message ?: "Unknown error occurred"
-                    )
+                    if (append) {
+                        _uiState.value = _uiState.value.copy(
+                            isAppending = false,
+                            error = exception.message ?: "Unknown error occurred"
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Unknown error occurred"
+                        )
+                    }
                 }
             )
         }
@@ -63,5 +89,8 @@ class TopAnimeViewModel @Inject constructor(
 data class TopAnimeUiState(
     val animeList: List<Anime> = emptyList(),
     val isLoading: Boolean = false,
+    val isAppending: Boolean = false,
+    val currentPage: Int = 1,
+    val hasNextPage: Boolean = true,
     val error: String? = null
 )

@@ -1,6 +1,6 @@
 package com.tamersarioglu.listu.domain.usecase
 
-import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
+import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 import com.tamersarioglu.listu.domain.repository.GetTopAnimeRepository
 import javax.inject.Inject
 
@@ -14,7 +14,7 @@ class GetTopAnimeUseCase @Inject constructor(
         sfw: Boolean = true,
         page: Int = 1,
         limit: Int = 25
-    ): Result<List<Anime>> {
+    ): Result<TopAnimePage> {
         return repository.getTopAnime(type, filter, rating, sfw, page, limit)
     }
 }

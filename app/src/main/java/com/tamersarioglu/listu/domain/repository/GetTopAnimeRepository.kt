@@ -1,6 +1,6 @@
 package com.tamersarioglu.listu.domain.repository
 
-import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
+import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 
 interface GetTopAnimeRepository {
     suspend fun getTopAnime(
@@ -10,5 +10,5 @@ interface GetTopAnimeRepository {
         sfw: Boolean = true,
         page: Int = 1,
         limit: Int = 25
-    ): Result<List<Anime>>
+    ): Result<TopAnimePage>
 }

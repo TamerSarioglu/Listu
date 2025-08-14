@@ -387,7 +387,7 @@ private fun AnimeDetailContent(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = { /* TODO: Open MAL link */ },
+                        onClick = { uriHandler.openUri(animeDetail.url) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
