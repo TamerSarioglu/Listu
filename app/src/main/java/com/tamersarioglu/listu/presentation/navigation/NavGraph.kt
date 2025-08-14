@@ -29,9 +29,7 @@ fun NavGraph(
             val animeDetailRoute = backStackEntry.toRoute<AnimeDetailRoute>()
             AnimeDetailScreen(
                 malId = animeDetailRoute.malId,
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

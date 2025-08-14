@@ -12,34 +12,43 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = AnimeBlue80,
-    secondary = AnimeBlueGrey80,
-    tertiary = AnimeAccent80,
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White
+    primary = DarkOrange80,
+    secondary = OrangeAccent,
+    tertiary = VibrantOrange,
+    background = DarkGrey90,
+    surface = DarkGrey80,
+    surfaceVariant = DarkGrey70,
+    onPrimary = DarkGrey90,
+    onSecondary = DarkGrey90,
+    onTertiary = DarkGrey90,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = DarkGrey40,
+    outlineVariant = DarkGrey60
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = AnimeBlue40,
-    secondary = AnimeBlueGrey40,
-    tertiary = AnimeAccent40,
-    background = AnimeBackground,
-    surface = AnimeCardBackground,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onBackground = AnimeTextPrimary,
-    onSurface = AnimeTextPrimary
+    primary = DarkOrange60,
+    secondary = OrangeAccent,
+    tertiary = VibrantOrange,
+    background = DarkGrey80,
+    surface = DarkGrey70,
+    surfaceVariant = DarkGrey60,
+    onPrimary = TextPrimary,
+    onSecondary = TextPrimary,
+    onTertiary = TextPrimary,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = DarkGrey40,
+    outlineVariant = DarkGrey60
 )
 
 @Composable
 fun ListuTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
