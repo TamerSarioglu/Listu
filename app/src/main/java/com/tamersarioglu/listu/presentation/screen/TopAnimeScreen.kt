@@ -143,9 +143,14 @@ fun TopAnimeScreen(
                                     state = listState
                                 ) {
                                     items(uiState.animeList) { anime ->
+                                        val isFavorite by viewModel.isFavorite(anime.malId)
+                                            .collectAsState(initial = false)
+
                                         AnimeCard(
                                             anime = anime,
-                                            onAnimeClick = onAnimeClick
+                                            onAnimeClick = onAnimeClick,
+                                            isFavorite = isFavorite,
+                                            onFavoriteClick = { viewModel.toggleFavorite(it) }
                                         )
                                     }
                                     if (uiState.isAppending) {

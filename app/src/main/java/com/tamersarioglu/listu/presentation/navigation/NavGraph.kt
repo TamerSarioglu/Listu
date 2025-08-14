@@ -45,7 +45,11 @@ fun NavGraph(
         }
 
         composable<FavoritesRoute> {
-            FavoritesScreen()
+            FavoritesScreen(
+                onAnimeClick = { malId ->
+                    navController.navigate(AnimeDetailRoute(malId = malId))
+                }
+            )
         }
 
         composable<SettingsRoute> {

@@ -88,7 +88,14 @@ fun SearchScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(uiState.results) { anime ->
-                        AnimeCard(anime = anime, onAnimeClick = onAnimeClick)
+                        val isFavorite by viewModel.isFavorite(anime.malId)
+                            .collectAsState(initial = false)
+                        AnimeCard(
+                            anime = anime,
+                            onAnimeClick = onAnimeClick,
+                            isFavorite = isFavorite,
+                            onFavoriteClick = { viewModel.toggleFavorite(it) }
+                        )
                     }
                     if (uiState.isAppending) {
                         item {

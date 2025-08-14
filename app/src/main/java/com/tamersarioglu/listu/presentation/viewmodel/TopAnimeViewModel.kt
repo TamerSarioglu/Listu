@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.tamersarioglu.listu.domain.model.topanimemodel.Anime
 import com.tamersarioglu.listu.domain.model.topanimemodel.TopAnimePage
 import com.tamersarioglu.listu.domain.usecase.GetTopAnimeUseCase
+import com.tamersarioglu.listu.domain.usecase.IsFavoriteUseCase
+import com.tamersarioglu.listu.domain.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TopAnimeViewModel @Inject constructor(
-    private val getTopAnimeUseCase: GetTopAnimeUseCase
+    private val getTopAnimeUseCase: GetTopAnimeUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val isFavoriteUseCase: IsFavoriteUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TopAnimeUiState())
@@ -79,6 +83,22 @@ class TopAnimeViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun toggleFavorite(anime: Anime) {
+        viewModelScope.launch {
+            try {
+                toggleFavoriteUseCase(anime)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to update favorites: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun isFavorite(malId: Int): kotlinx.coroutines.flow.Flow<Boolean> {
+        return isFavoriteUseCase.asFlow(malId)
     }
 
     fun retry() {
