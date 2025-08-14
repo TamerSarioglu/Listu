@@ -10,3 +10,9 @@ data class AnimeDetailRoute(val malId: Int)
 
 @Serializable
 object SearchRoute
+
+@Serializable
+object FavoritesRoute
+
+@Serializable
+object SettingsRoute

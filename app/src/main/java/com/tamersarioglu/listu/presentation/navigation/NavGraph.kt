@@ -7,7 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.tamersarioglu.listu.presentation.screen.AnimeDetailScreen
+import com.tamersarioglu.listu.presentation.screen.FavoritesScreen
 import com.tamersarioglu.listu.presentation.screen.SearchScreen
+import com.tamersarioglu.listu.presentation.screen.SettingsScreen
 import com.tamersarioglu.listu.presentation.screen.TopAnimeScreen
 
 @Composable
@@ -40,6 +42,14 @@ fun NavGraph(
                 onBackClick = { navController.popBackStack() },
                 onAnimeClick = { malId -> navController.navigate(AnimeDetailRoute(malId)) }
             )
+        }
+
+        composable<FavoritesRoute> {
+            FavoritesScreen()
+        }
+
+        composable<SettingsRoute> {
+            SettingsScreen()
         }
     }
 }
