@@ -2,8 +2,10 @@ package com.tamersarioglu.listu.di
 
 import com.tamersarioglu.listu.data.repository.GetAnimeDetailRepositoryImpl
 import com.tamersarioglu.listu.data.repository.GetTopAnimeRepositoryImpl
+import com.tamersarioglu.listu.data.repository.SearchAnimeRepositoryImpl
 import com.tamersarioglu.listu.domain.repository.GetAnimeDetailRepository
 import com.tamersarioglu.listu.domain.repository.GetTopAnimeRepository
+import com.tamersarioglu.listu.domain.repository.SearchAnimeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,4 +27,10 @@ abstract class RepositoryModule {
     abstract fun bindGetAnimeDetailRepository(
         getAnimeDetailRepositoryImpl: GetAnimeDetailRepositoryImpl
     ): GetAnimeDetailRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchAnimeRepository(
+        searchAnimeRepositoryImpl: SearchAnimeRepositoryImpl
+    ): SearchAnimeRepository
 }

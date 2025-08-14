@@ -7,3 +7,6 @@ object TopAnimeRoute
 
 @Serializable
 data class AnimeDetailRoute(val malId: Int)
+
+@Serializable
+object SearchRoute

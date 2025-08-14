@@ -2,6 +2,7 @@ package com.tamersarioglu.listu.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.tamersarioglu.listu.data.remote.api.animedetailservice.AnimeDetailService
+import com.tamersarioglu.listu.data.remote.api.searchanimeservice.SearchAnimeService
 import com.tamersarioglu.listu.data.remote.api.topanimeservice.TopAnimeService
 import dagger.Module
 import dagger.Provides
@@ -10,7 +11,9 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -26,12 +29,12 @@ object NetworkModule {
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(
-                okhttp3.logging.HttpLoggingInterceptor().apply {
-                    level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
                 }
             )
-            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
 
 
@@ -58,4 +61,8 @@ object NetworkModule {
     fun provideAnimeDetailService(retrofit: Retrofit): AnimeDetailService =
         retrofit.create(AnimeDetailService::class.java)
 
+    @Provides
+    @Singleton
+    fun provideSearchAnimeService(retrofit: Retrofit): SearchAnimeService =
+        retrofit.create(SearchAnimeService::class.java)
 }

@@ -1,10 +1,11 @@
-package com.tamersarioglu.listu.data.remote.dto.topanimedto
+package com.tamersarioglu.listu.data.remote.dto.common
 
+import com.tamersarioglu.listu.data.remote.dto.topanimedto.AnimeDto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TopAnimeResponseDto(
+data class AnimeListResponseDto(
     @SerialName("pagination") val pagination: PaginationDto,
     @SerialName("data") val data: List<AnimeDto>
 )
